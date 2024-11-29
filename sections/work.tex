@@ -1,0 +1,89 @@
+\section{Current and future work}
+
+\begin{frame}{Collaboration with Gilles Monnoyer (PhD candidate at UCL)}
+  \pause
+  \begin{block}{Target problem}
+    \begin{equation}
+      \label{prob:gille-sparse-problem}
+      \tag{$\pb$}
+      \opt{\pv} \in \textstyle\arg\min_{\pv} \Big\{ \lossfunc(\dic\pv) + \reg\regfunc(\pv) \Big\}
+    \end{equation}
+    with $\lossfunc$ convex and $\regfunc(\pv) = \norm{\pv}{0} + \Icvx(\norm{\pv}{\infty} \leq \bigM)$.
+  \end{block}
+  \pause
+  \textbf{Extension of node-screening to greedy methods}
+  \begin{itemize}
+    \item Use node-screening to accelerate \emphone{greedy} (heuristic) methods
+    \pause
+    \item Similar to \gls{bnb} algorithm but \emphone{not all nodes} are explored
+    \pause
+    \item Hopefully this will lead to \emphone{one conference} paper
+  \end{itemize}
+  \pause
+  \textbf{Peeling tests}
+  \begin{itemize}
+    \item The \emphone{Big-M constraint} is a huge bottleneck
+    \pause
+    \item We have developed \emphone{peeling tests} to tighten it
+    \pause
+    \item At least one conference paper (we are targeting \emphone{two conference} and \emphone{one journal} paper)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Next steps in the Screen \& Relax project}
+  \begin{block}{Target problem}
+    \begin{equation}
+      \label{prob:next-convex-sparse-problem}
+      \tag{$\pb$}
+      \opt{\pv} \in \textstyle\arg\min_{\pv} \Big\{ \lossfunc(\dic\pv) + \reg\regfunc(\pv) \Big\}
+    \end{equation}
+    with $\lossfunc$ and $\regfunc$ convex.
+  \end{block}
+  \pause
+  \textbf{Generalization of the method}
+  \begin{itemize}
+    \item Any \emphone{convex} $\lossfunc$ and $\regfunc$
+    \pause
+    \item \emphone{Unified framework} for screening and relaxing tests
+    \pause
+    \item \emphone{Generic method} to accelerate the solution process
+  \end{itemize}
+  \pause
+  \textbf{Current state}
+  \begin{itemize}
+    \item Theoretical part done
+    \pause
+    \item Numerical experiments to be concluded
+    \pause
+    \item \emphone{One journal} paper ongoing
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Next steps in the node-screening project}
+  \begin{block}{Target problem}
+    \begin{equation}
+      \label{prob:next-nonconvex-sparse-problem}
+      \tag{$\pb$}
+      \opt{\pv} \in \textstyle\arg\min_{\pv} \Big\{ \lossfunc(\dic\pv) + \reg\regfunc(\pv) \Big\}
+    \end{equation}
+    with $\lossfunc$ convex and $\regfunc(\pv) = \norm{\pv}{0} + \emphone{\Omega(\pv)}$.
+  \end{block}
+  \pause
+  \textbf{Generalization of the method}
+  \begin{itemize}
+    \item Any \emphone{convex} $\lossfunc$ and $\Omega$
+    \pause
+    \item \emphone{Generic} and \emphone{efficient} \gls{bnb} algorithm tailored to \eqref{prob:next-nonconvex-sparse-problem}
+    \pause
+    \item Only \gls{bnb} tailored to particular cases for now
+  \end{itemize}
+  \pause
+  \textbf{Current state}
+  \begin{itemize}
+    \item Theoretical part done
+    \pause
+    \item Numerical experiments to be concluded
+    \pause
+    \item At least \emphone{one journal} paper ongoing
+  \end{itemize}
+\end{frame}

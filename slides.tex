@@ -1,0 +1,397 @@
+%!TEX output_directory = aux
+%!TEX aux_directory = aux
+
+\documentclass[10pt]{beamer}
+
+\usetheme[
+  numbering=fraction,
+  block=fill,
+  % background=dark
+  ]{metropolis}
+%\setbeamercovered{transparent}
+
+\usepackage{appendixnumberbeamer}
+\usepackage{booktabs}
+\usepackage[scale=2]{ccicons}
+\usepackage{pgfplots}
+
+\include{headings/packages}
+\include{headings/shortcuts}
+\include{headings/macros}
+\include{headings/glossaries}
+
+% \setbeamercovered{transparent} 
+
+\title{Screen \& Relax}
+\subtitle{Accélérer la résolution de l'Elastic-Net par identification du support de la solution}
+\date{\textbf{GRETSI -- 8 Septembre 2022}}
+\author{Théo Guyard${}^{1,2}$, Cédric Herzet${}^{2}$, Clément Elvira${}^{3}$ \\ \scriptsize{${}^{1}$ INSA Rennes} \\ \scriptsize{${}^{2}$ INRIA Rennes Bretagne Atlantique} \\ \scriptsize{${}^{3}$ IETR CentraleSupélec}}
+
+\begin{document}
+
+\begin{frame}
+  \maketitle
+\end{frame}
+
+\section{General context}
+
+\begin{frame}{Sparse problem}
+  \textbf{Ingredients of the problem}
+  \begin{itemize}
+    \item A \emphone{target} $\obs$
+    \pause
+    \item A \emphone{dictionary} $\dic=\{\atom_{\idxentry}\}_{\idxentry\in\mathcal{I}}$ made of \emphone{atoms} 
+  \end{itemize}
+  \pause
+  \textbf{Objective}
+  \begin{itemize}
+    \item Find a \emphone{sparse} linear combination of atoms that \emphone{well approximates} the target through a given model
+  \end{itemize}
+  \pause
+  \textbf{Rough formulation}
+  \begin{center}
+    \begin{minipage}{0.6\linewidth}
+      \begin{block}{Problem}
+        \centering
+        Find $\pv$ \emphone{sparse} such that \emphone{$\obs \simeq$ Model$(\dic \pv)$}
+      \end{block}
+    \end{minipage}
+  \end{center}
+  \pause
+  Remark : Entries of $\pv$ weight each atom in the linear combination.
+\end{frame}
+
+\section{The Elastic-Net problem}
+
+\begin{frame}{Formulation and properties}
+  \begin{block}{Target problem}
+    Solve
+    \begin{equation}
+      \label{prob:primal}
+      \tag{$\ppb$}
+      \opt{\pv} = \textstyle\arg\min_{\pv} 
+      \Big\{ 
+        \pfunc(\pv) = 
+        \underbrace{
+          \tfrac{1}{2}\norm{\obs-\dic\pv}{2}^2
+        }_{
+          \emphone{\lossfunc(\dic\pv)}
+        }
+      +
+        \underbrace{
+          \reg
+          (\enetparam\norm{\pv}{1} + \tfrac{1-\enetparam}{2}\norm{\pv}{2})
+        }_{
+          \emphone{\reg\regfunc(\pv)}
+        }
+      \Big\}
+    \end{equation}
+    where $\reg > 0$ and $\enetparam \in ]0,1[$ are tuning hyperparameters.
+  \end{block}
+  
+  \pause
+  \textbf{Properties of \eqref{prob:primal}}
+  \begin{itemize}
+    \item Convex non-smooth problem
+    \item Least-squares : Ensures a \emphone{good reconstruction} of the target
+    \item $\ell_1$-norm : Enforces \emphone{sparsity}
+    \item $\ell_2$-norm : Promotes desirable properties
+  \end{itemize}
+
+  \pause
+  \textbf{Solving \eqref{prob:primal}}
+  \begin{itemize}
+    \item Broad class of solution methods (gradient-based, pivot-based, ...)
+    \item Acceleration strategies (backtracking, \emphone{screening tests}, ...)
+  \end{itemize}
+\end{frame}
+
+\section{Screening and Relaxing tests}
+
+\begin{frame}{Main idea}
+  \textbf{In the context of a sparse problem}
+  \begin{itemize}
+    \pause \item Where are \emphone{zero} and \emphone{non-zero} entries in $\opt{\pv}$ ?
+    \pause \item Can we \emphone{accelerate} a given solution method if we knew some ?
+    \pause \item[$\rightarrow$] Spoiler alert : Yes and yes ! We can leverage \emphone{duality}.
+  \end{itemize}
+  
+  \pause
+  ~\\
+  \begin{minipage}{0.45\linewidth}
+    \begin{block}{\emphone{Primal} problem}
+      \begin{equation}
+        \tag{$\ppb$}
+        \opt{\pv} = \textstyle\arg\min_{\pv} 
+        \pfunc(\pv)
+      \end{equation}
+    \end{block}
+  \end{minipage}
+  \hfill
+  \begin{minipage}{0.04\linewidth}
+    \begin{center}
+      \hspace{-0.25cm}
+      {\LARGE$\equiv$}
+    \end{center}
+  \end{minipage}
+  \hfill
+  \begin{minipage}{0.47\linewidth}
+    \begin{block}{\emphone{Dual} problem}
+      \begin{equation}
+        \tag{$\dpb$}
+        \opt{\dv} = \textstyle\arg\max_{\dv} 
+        \dfunc(\dv)
+      \end{equation}
+    \end{block}
+  \end{minipage}
+  \begin{center}
+    with \emphone{optimality conditions} linking $\opt{\pv}$ and $\opt{\dv}$
+  \end{center}
+\end{frame}
+
+\begin{frame}{Optimality conditions}
+
+  \begin{minipage}{0.49\linewidth}
+    \vspace{0.5cm}
+    \begin{center}
+      $\qquad\quad\transp{\atom_i}\opt{\dv} \in \reg\subdiff\regfunc(\opt{\pvi{i}})$
+    \end{center}
+    \pause
+    \vspace{-1.5cm}
+    \begin{figure}[!ht]
+      \small
+      \begin{tikzpicture}[
+          domain=-1:1,
+          xscale = 2.5,
+          yscale = 2.5,
+          lbl/.style = {font=\scriptsize, fill=white, 
+          inner sep=2pt}
+      ]
+        \node (origin) at (0,0) {};
+        \draw[->] (-1,0) -- (1, 0);
+        \draw[->] (0,0) -- (0, 0.5);
+        %
+        \draw[blue,thick,domain=-1:1] plot (\x, {0.25 * abs(\x) + 0.25 * (\x)^2});
+        \node[blue] at (1,0.85) {};
+        \node (point3) at (-0.5,0.1875) {};
+        \fill[red] (point3) circle (\pointsize);
+        \node[below left,red] at (point3) {\scriptsize$\subdiff\regfunc(\pvi{\idxentry})<-\enetparam$};
+        \node (point1) at (0,0) {};
+        \fill[red] (point1) circle (\pointsize);
+        \node[below,red] at (point1) {\scriptsize$\subdiff\regfunc(\pvi{\idxentry})=[-\enetparam,\enetparam]$};
+        \node (point2) at (0.5,0.1875) {};
+        \fill[red] (point2) circle (\pointsize);
+        \node[below right,red] at (point2) {\scriptsize$\subdiff\regfunc(\pvi{\idxentry})>\enetparam$};
+      \end{tikzpicture}
+    \end{figure}
+  \end{minipage}
+  \pause
+  \hfill
+  \begin{minipage}{0.40\linewidth}
+    \begin{equation*}
+      \begin{array}{rcl}
+        \abs{\transp{\atom_{\idxentry}}\opt{\dv}} \leq \reg\enetparam &\iff& \opt{\pvi{\idxentry}} = 0 \\
+        \abs{\transp{\atom_{\idxentry}}\opt{\dv}} > \reg\enetparam &\iff& \opt{\pvi{\idxentry}} \neq 0 
+      \end{array}
+    \end{equation*}
+  \end{minipage}
+  ~\\
+  \vspace*{1cm}
+  \pause
+  \begin{minipage}{0.4\linewidth}
+    \input{img/opt-cond.tex}
+  \end{minipage}
+  \pause
+  \hfill
+  \begin{minipage}{0.59\linewidth}
+    We can identify zeros and non-zeros in $\opt{\pv}$ \pause \emphone{... but we need $\opt{\dv}$ !}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}{Relaxed optimality condition}
+  Let \emphone{$\opt{\dv} \in \safesphere(\spherecenter,\sphereradius)$}, then
+  \begin{equation*}
+    \begin{array}{rcl}
+      \abs{\transp{\atom_{\idxentry}}\spherecenter} + \sphereradius \leq \reg\enetparam &\implies& \opt{\pvi{\idxentry}} = 0 \qquad \text{\emphone{(screening test)}} \\
+      \pause
+      \abs{\transp{\atom_{\idxentry}}\spherecenter} - \sphereradius > \reg\enetparam &\implies& \opt{\pvi{\idxentry}} \neq 0 \qquad \text{\emphone{(relaxing test)}} 
+    \end{array}
+  \end{equation*}
+  \pause
+  $\rightarrow$ No $\opt{\dv}$ needed anymore, but only a \emphone{``safe region''} containing it !
+  \pause
+  \vspace*{1cm}
+  \begin{center}
+    \input{img/opt-cond-relax.tex}
+  \end{center}
+\end{frame}
+
+\section{Dimensionality reduction}
+
+\begin{frame}{Leveraging test results}
+  \begin{block}{With \emphone{screening} test}
+    \emphone{Zero} entries  identified in $\opt{\pv}$ can be \emphone{discarded} from the problem without changing the objective value.
+  \end{block}
+  \vspace{0.5cm}
+  \pause
+
+  \begin{block}{With \emphone{relaxing} test}
+    \emphone{Non-zero} entries identified in $\opt{\pv}$ can be expressed as a \emphone{linear combination} of all the other entries.
+  \end{block}
+\end{frame}
+
+\begin{frame}{Problem reformulation}
+  \textbf{Notations}
+  $(\setzero,\setone,\setnone)$ : Set of \emphone{zero}/\emphone{non-zero}/\emphone{unclassified} entries in $\opt{\pv}$
+  
+  \pause
+  \begin{center}
+    \textbf{Initial problem}
+  \end{center}
+  \begin{equation*}
+    \opt{\pv} = \argmin_{\emphone{\pv \in \kR^{\pdim}}} \ 
+    \Big\{
+    \pfunc(\pv) = 
+      \tfrac{1}{2}\norm{\obs-\dic\pv}{2}^2
+      + \reg (
+        \enetparam\norm{\pv}{1}
+        + \tfrac{1-\enetparam}{2} \norm{\pv}{2}^2
+      )
+    \Big\}
+  \end{equation*}
+  \begin{center}
+    $\pdim$ dimensional problem
+  \end{center}
+
+  \pause
+  \vspace{-0.2cm}
+  \begin{center}
+    \vspace{0.1cm}
+    \rotatebox[origin=c]{-90}{\LARGE$\leadsto$}
+  \end{center}
+  \vspace{-0.2cm}
+
+  \begin{center}
+    \textbf{Reduced problem}
+  \end{center}
+  \begin{equation*}
+    \left\{
+      \begin{array}{rl}
+        \opt{\pv}_{\setnone} &= \argmin_{\emphone{\pv \in \kR^{\card{\setnone}}}} \ 
+        \Big\{
+        \emphone{\reduced{\pfunc}}(\pv) = 
+          \tfrac{1}{2}\norm{\emphone{\reduced{\obs}}-\emphone{\reduced{\dic}}\pv}{2}^2
+          + \reg (
+            \enetparam\norm{\pv}{1}
+            + \tfrac{1-\enetparam}{2} \|\pv\|{}_{\emphone{\matnorm}}^2
+          )
+        \Big\} \\
+        \opt{\pv}_{\setone} &= \matred\opt{\pv}_{\setnone} + \vecred \\
+        \opt{\pv}_{\setzero} &= \0
+      \end{array}
+    \right.
+  \end{equation*}
+  \pause
+  \begin{center}
+    $\emphone{\pdim-\card{\setzero}-\card{\setone}}$ dimensional problem (similar structure) \\
+    Some linear algebra operations (negligible computational cost)
+  \end{center}
+\end{frame}
+
+\begin{frame}{Dynamic Screen \& Relax principle}
+  \begin{figure}
+    \centering
+    \begin{minipage}{0.8\linewidth}
+      \begin{algorithm}[H]
+        \small
+        \DontPrintSemicolon
+        \SetKwInOut{Input}{Input}
+        \Input{$\dic$, $\obs$, $\reg$, $\enetparam$, $\pv^{(0)}$}
+        
+        \BlankLine
+        \((\setzero,\setone,\setnone) \leftarrow (\emptyset,\emptyset,\{1,\dots,\pdim\})\)\;
+        \BlankLine
+
+        \While{convergence criterion is not met}{
+          %
+          \pause Update the current iterate \;
+          \pause Update $(\setzero,\setone,\setnone)$ with screening and relaxing tests\;
+          \pause Reduce the problem\;
+          \pause \If{$\setnone = \emptyset$}{
+            The solution is available in closed form
+          }
+        }
+        \caption{``Screen \& Relax'' solving procedure}
+      \end{algorithm}
+    \end{minipage}
+  \end{figure}
+\end{frame}
+
+\section{Some numerical results}
+
+\begin{frame}{Experimental setup}
+  \textbf{Synthetic data generation}
+  \begin{itemize}
+    \item Generate the dictionary $\dic$ randomly
+    \item Generate a k-sparse vector $\pv^{\dagger}$
+    \item Set $\obs = \dic\opt{\pv} + \text{noise}$
+    \item Solve \eqref{prob:primal} with a tailored method
+  \end{itemize}
+  \pause
+  \textbf{Concurrent methods}
+  \begin{itemize}
+    \item Accelerated proximal-gradient algorithm 
+    \item Same with \emphone{screening} tests
+    \item Same with \emphone{relaxing} tests
+    \item Same with \emphone{screening and relaxing} tests 
+  \end{itemize}
+  \pause
+  \textbf{Metrics}
+  \begin{itemize}
+    \item Duality gap : How close is the objective from its optimal value
+    \item FLOPs : Number of linear algebra operations performed
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Classical convergence scheme}
+  \begin{center}
+    \begin{tikzpicture}
+      \begin{axis}[
+        width=0.8\textwidth,
+        height=0.5\textwidth,
+        xmode=log,
+        ymode=log,
+        xlabel={Duality gap},
+        ylabel={FLOPs},
+        x dir=reverse,
+        legend pos=north west,
+        legend cell align=left,
+        legend style={
+          fill = white, 
+          fill opacity=0.7,
+          text opacity = 1,
+          font = \scriptsize,
+        }
+      ]
+        \addplot[cyan,ultra thick] table [x=dgap, y=aPG] {dat/convergence.dat};
+        \addplot[blue,ultra thick] table [x=dgap, y=aPGs] {dat/convergence.dat};
+        \addplot[orange,ultra thick] table [x=dgap, y=aPGr] {dat/convergence.dat};
+        \addplot[red,ultra thick] table [x=dgap, y=aPGsr] {dat/convergence.dat};
+        \legend{\aPG,\aPGs,\aPGr (contrib.),\aPGsr (contrib.)}
+      \end{axis}
+    \end{tikzpicture}
+  \end{center}
+  \vspace{-0.25cm}
+  \pause
+  \begin{itemize}
+    \item Complexity reduction with screening and/or relaxing
+    \pause \item Convergence to machine precision at some point
+    \pause \item Gains depend on the sparsity in $\opt{\pv}$
+    \begin{itemize}
+      \item Too few non-zeros : relaxing has little impact
+      \item Too many non-zeros : problem updates become binding
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\end{document}

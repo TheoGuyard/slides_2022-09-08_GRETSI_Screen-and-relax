@@ -1,0 +1,109 @@
+\section{General context}
+
+\begin{frame}{Sparse problem}
+  \textbf{Ingredients of the problem}
+  \begin{itemize}
+    \item A \emphone{target} $\obs$
+    \pause
+    \item A \emphone{dictionary} $\dic=\{\atom_{\idxentry}\}_{\idxentry\in\mathcal{I}}$ made of \emphone{atoms} 
+  \end{itemize}
+  \pause
+  \textbf{Objective}
+  \begin{itemize}
+    \item Find a \emphone{sparse} linear combination of atoms that \emphone{well approximates} the target through a given model
+  \end{itemize}
+  \pause
+  \textbf{Rough formulation}
+  \begin{center}
+    \begin{minipage}{0.6\linewidth}
+      \begin{block}{Problem}
+        \centering
+        Find $\pv$ sparse such that $\obs \simeq$ Model$(\dic \pv)$
+      \end{block}
+    \end{minipage}
+  \end{center}
+  \pause
+  Remark : Entries of $\pv$ weight each atom in the linear combination.
+\end{frame}
+
+\begin{frame}{Formuation as an optimziation problem}
+  \begin{block}{Sparse optimization problem}
+    \begin{equation}
+        \label{prob:sparse-problem}
+        \tag{$\pb$}
+        \opt{\pv} \in \textstyle\arg\min_{\pv} \Big\{ \lossfunc(\dic\pv) + \reg\regfunc(\pv) \Big\}
+    \end{equation}
+    \pause
+    where
+    \begin{itemize}
+        \item The \emphone{loss} $\lossfunc(\dic\pv)$ ensures the model fitting
+        \pause
+        \item The \emphone{regularizer} $\regfunc(\pv)$ enforces the sparsity 
+        \pause
+        \item The parameter $\reg$ \emphone{balances} the two objectives
+    \end{itemize}
+  \end{block}
+  \pause
+  \textbf{Solving \eqref{prob:sparse-problem}}
+  \begin{itemize}
+      \item The algorithm depends on the properties of $\lossfunc$ and $\regfunc$
+      \pause
+      \item High-dimensional data bottleneck
+      \pause
+      \item Bad-conditioning bottleneck
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Losses and regularizers}
+    \textbf{Which loss to choose ?}
+    \begin{itemize}
+        \item Depends on the model :
+        \pause
+        \begin{itemize}
+            \item Classification with \emphone{$\obs \in \{-1,1\}^{\ddim}$} : $\lossfunc(\dic\pv) = \log(1+\exp(-\transp{\obs}\dic\pv))$
+            \pause
+            \item Regression with \emphone{$\obs \in \kR^{\ddim}$} : $\lossfunc(\dic\pv) = \tfrac{1}{2}\norm{\obs-\dic\pv}{2}^2$
+            \pause
+            \item ...
+        \end{itemize}
+        \pause
+        \item In general 
+        \begin{itemize}
+            \item $\lossfunc$ is \emphone{convex}
+            \pause
+            \item $\lossfunc$ is \emphone{separable}
+            \pause
+            \item $\lossfunc$ is \emphone{differentiable}
+            \pause
+            \item $\grad\lossfunc$ is \emphone{Lipschitz}
+        \end{itemize}
+        \pause
+        \item[$\rightarrow$] The loss does not impact much the problem properties and the solution method choice
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Losses and regularizers}
+    \textbf{Which regularizer to choose ?}
+    \begin{itemize}
+        \item Most intuitive choice : \emphone{$\regfunc(\pv) = \norm{\pv}{0}$}
+        \pause
+        \begin{itemize}
+            \item Hard to tackle, NP-hard problem
+            \pause
+            \item \gls{mip} reformulation
+            \pause
+            \item Addressable with \gls{bnb} algorithms
+        \end{itemize}
+        \pause
+        \item Relaxed choice : \emphone{$\regfunc(\pv) = \norm{\pv}{1}$}
+        \begin{itemize}
+            \item Still promotes sparsity
+            \pause
+            \item Convex function
+            \pause
+            \item Broad class of solution methods
+        \end{itemize}
+        \pause
+        \item ...
+    \end{itemize}
+\end{frame}

@@ -1,0 +1,77 @@
+\section{Non-convex sparse problems \\ {\small (\emphone{Node-screening} project)}}
+
+\begin{frame}{Contributions}
+
+  \begin{block}{Target problem}
+    Solve
+    \begin{equation}
+      \label{prob:nonconvex-sparse-problem}
+      \tag{$\pb$}
+      \opt{\pv} \in \textstyle\arg\min_{\pv} \Big\{ \lossfunc(\dic\pv) + \reg\regfunc(\pv) \Big\}
+    \end{equation}
+    where $\lossfunc$ is \emphone{convex} and $\regfunc(\pv) = \norm{\pv}{0} + \Icvx(\norm{\pv}{\infty} \leq \bigM)$ is \emphone{non-convex}
+  \end{block}
+  \pause
+  \textbf{Related work}
+  \begin{itemize}
+    \item \gls{mip} reformulation with tailored \gls{bnb} algorithms
+    \pause
+    \item \emphone{Screening tests} : identification of \emphone{zeros/non-zeros} in \emphone{pre-processing}
+  \end{itemize}
+  \pause
+  \textbf{Contributions}
+  \begin{itemize}
+    \item \emphone{Node-screening tests} : identification of \emphone{nodes} that cannot yield an optimal solution at \emphone{any step} of the solution process
+    \pause
+    \item Conference paper published at ICASSP 2022
+    \pause
+    \item Communication published at GRETSI 2022
+    \pause
+    \item Presentation at SMAI-MODE 2022 (Dodu award for the best poster)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{\glsdesc{bnb} algorithms}
+  \textbf{Idea :} \emphone{Enumerate} all the feasible solution and use \emphone{pruning} rules to discard irrelevant ones.
+  \pause
+  \begin{center}
+    \input{img/bnb}
+  \end{center}
+\end{frame}
+
+\begin{frame}{\glsdesc{bnb} algorithms}
+  \textbf{Idea :} \emphone{Enumerate} all the feasible solution and use \emphone{pruning} rules to discard irrelevant ones.
+  \begin{center}
+    \input{img/bnb-prune}
+  \end{center}
+\end{frame}
+
+\begin{frame}{Node-screening tests}
+  \textbf{Our initial idea}
+  \begin{itemize}
+    \item Many nodes cannot give an optimal solution in an ``obvious'' way
+    \pause
+    \item \gls{bnb} is an exact method so we have to \emphone{prove} it
+    \pause
+    \item Standard method : solve a \emphone{convex relaxation} and try to prune
+    \pause
+    \item \emphone{Heavy computations} to prune a node that is likely to be useless !
+  \end{itemize}
+  \pause
+  \textbf{Why not using a cheaper pruning method ?}
+  \begin{itemize}
+    \item We construct the \emphone{dual} of the convex relaxation
+    \pause
+    \item Duals are very similar between \emphone{consecutive nodes}
+    \pause
+    \item We leverage this relation to perform the \emphone{pruning test at a lower cost}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Node-screening tests}
+  \input{img/bnb-scr}
+  \pause
+  \begin{center}
+    Reduction in the number of nodes and in the solution time !
+  \end{center}
+\end{frame}

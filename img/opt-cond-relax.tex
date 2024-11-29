@@ -1,0 +1,33 @@
+\begin{tikzpicture}
+    \coordinate (A) at (0,0);
+    \coordinate (B) at (0,3);
+    \coordinate (C) at (3,3);
+    \coordinate (D) at (3,0);
+    \coordinate (E) at (2.2,0.9);
+    \coordinate (F) at (1.6,1.8);
+    \coordinate (G) at (2.4,0.4);
+    \coordinate (H) at (0.8,2.4);
+
+    \path[fill=magenta!15] (A) to (G) -- (2.5,0) to (A);
+    \path[fill=magenta!15] (A) to (H) -- (0,2.5) to (A);
+    \path[fill=teal!15] (A) to (F) -- (E) to (A);
+
+    \draw[thick,->] (A) -- (B);
+    \draw[thick,->] (A) -- (D);
+    \draw (A) -- (E);
+    \draw (A) -- (F);
+    \draw (A) -- (G);
+    \draw (A) -- (H);
+
+    \draw[thick, magenta, ->] (A) -- (5:2) node[right] {$\atom_1$};
+    \draw[thick, ->] (A) -- (16:2) node[right] {$\atom_2$};
+    \draw[thick, teal, ->] (A) -- (32:2) node[right] {$\atom_3$};
+    \draw[thick, teal, ->] (A) -- (42:2) node[right] {$\atom_4$};
+    \draw[thick, ->] (A) -- (60:2) node[right] {$\atom_5$};
+    \draw[thick, magenta, ->] (A) -- (85:2) node[right] {$\atom_6$};
+
+    \filldraw[color=gray!60, fill=gray!5, very thick](2.9,2.2) circle (0.5);
+    \node at (3.6,2.2) {$\safesphere$};
+    \draw[circle] (2.9, 2.2) node {$\bullet \ \opt{\dv}$};
+
+\end{tikzpicture}

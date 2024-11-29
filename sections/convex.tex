@@ -1,0 +1,162 @@
+\section{Convex sparse problems \\ {\small (\emphone{Screen \& Relax} project)}}
+
+\begin{frame}{Contributions}
+
+  \begin{block}{Target problem}
+    Solve
+    \begin{equation}
+      \label{prob:convex-sparse-problem}
+      \tag{$\pb$}
+      \opt{\pv} \in \textstyle\arg\min_{\pv} \Big\{ \lossfunc(\dic\pv) + \reg\regfunc(\pv) \Big\}
+    \end{equation}
+    with $\lossfunc$ and $\regfunc$ \emphone{convex}.
+  \end{block}
+  
+  \onslide<2->{
+    \textbf{Related work}
+  }
+  \begin{itemize}
+    \item<2-> Broad class of solution methods (mostly gradient-based)
+    \item<3-> Different acceleration techniques (step tuning, \etc...)
+    \item<4-> \emphone{Screening tests} : identification of \emphone{zeros} in $\opt{\pv}$
+  \end{itemize}
+  \onslide<5->{
+    \textbf{Contributions}
+  }
+  \begin{itemize}
+    \item<5-> Acceleration method leveraging the identification of \emphone{non-zeros} in $\opt{\pv}$
+    \item<6-> Conference paper published at ICASSP 2022
+    \item<7-> Communication published at GRETSI 2022
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Screening and relaxing tests}
+  \textbf{Characterization of $\subdiff\regfunc$}
+  \newcommand{\pointsize}{0.025}
+  \begin{figure}[!ht]
+    \small
+    \begin{tikzpicture}[
+        domain=-1:1,
+        xscale = 2.5,
+        yscale = 2.5,
+        lbl/.style = {font=\scriptsize, fill=white, 
+        inner sep=2pt}
+    ]
+      \node (origin) at (0,0) {};
+      \draw[->] (-1,0) -- (1, 0);
+      \draw[->] (0,0) -- (0, 1);
+      %
+      \draw[blue,thick,domain=-1:1] plot (\x, {0.5 * abs(\x) + 0.25 * (\x)^2});
+      \node[blue] at (1,0.85) {};
+      %
+      \pause
+      %
+      \node (point3) at (-0.5,0.3125) {};
+      \fill[red] (point3) circle (\pointsize);
+      \node[below left,red] at (point3) {\scriptsize$\subdiff\regfunc(\pvi{\idxentry})\leq-\subdiffthresh$};
+      %
+      \pause
+      %
+      \node (point1) at (0,0) {};
+      \fill[red] (point1) circle (\pointsize);
+      \node[below,red] at (point1) {\scriptsize$\subdiff\regfunc(\pvi{\idxentry})=[-\subdiffthresh,\subdiffthresh]$};
+      %
+      \pause
+      %
+      \node (point2) at (0.5,0.3125) {};
+      \fill[red] (point2) circle (\pointsize);
+      \node[below right,red] at (point2) {\scriptsize$\subdiff\regfunc(\pvi{\idxentry})\geq\subdiffthresh$};
+    \end{tikzpicture}
+  \end{figure}
+  \pause
+  \onslide<5->{
+    \textbf{Screening and relaxing tests}
+    \begin{itemize}
+      \item Screening test : if \emphone{$\abs{\subdiff\regfunc(\opt{\pvi{\idxentry}})} < \subdiffthresh$}, then \emphone{$\opt{\pvi{\idxentry}}=0$} 
+      \pause
+      \item Relaxing test : if \emphone{$\abs{\subdiff\regfunc(\opt{\pvi{\idxentry}})} > \subdiffthresh$}, then \emphone{$\opt{\pvi{\idxentry}}\neq0$} 
+      \pause
+      \item[$\rightarrow$] Using convex duality and opt. conditions, one can bound $\abs{\subdiff\regfunc(\opt{\pv})}$
+      \pause
+      \item[$\rightarrow$] The bound is refined with the current iterate $\pv^{(t)}$
+    \end{itemize}
+  }
+\end{frame}
+
+\begin{frame}{Leveraging zero and non-zero identifications}
+  Let
+  \begin{itemize}
+    \item $\pdim$ be the \emphone{initial dimension} of the variable $\pv$
+    \pause
+    \item $\setzero$ be the set of \emphone{zeros} identified in $\opt{\pv}$ 
+    \pause
+    \item $\setone$ be the set of \emphone{non-zeros} identified in $\opt{\pv}$ 
+  \end{itemize}
+  \pause
+  \begin{minipage}{0.49\linewidth}
+    \begin{block}{Target problem + \emphone{$\setzero$}}
+      Discard indices in $\setzero$ :
+      \begin{equation}
+        \label{prob:convex-sparse-problem-zero}
+        \tag{$\pb$}
+        \left\{
+          \begin{array}{rl}
+            \min_{\pv} & \lossfunc(\dic\pv) + \reg\regfunc(\pv) \\
+            \text{\st} & \emphone{\subzero{\pv}=\0}
+          \end{array}
+        \right.
+      \end{equation}
+      \pause
+      \begin{center}
+        Dimension shrinking : \emphone{$\pdim \rightarrow \pdim - \card{\setzero}$}
+      \end{center}
+    \end{block}
+  \end{minipage}
+  \pause
+  \begin{minipage}{0.49\linewidth}
+    \begin{block}{Target problem + \emphone{$\setone$}}
+      Re-express indices in $\setone$ :
+      \begin{equation}
+        \label{prob:convex-sparse-problem-nonzero}
+        \tag{$\pb$}
+        \left\{
+          \begin{array}{rl}
+            \min_{\pv} & \lossfunc(\dic\pv) + \reg\regfunc(\pv) \\
+            \text{\st} & \emphone{\subone{\pv}=\matred\pv_{\setone^\complement} + \vecred}
+          \end{array}
+        \right.
+      \end{equation}
+      \pause
+      \begin{center}
+        Dimension shrinking : \emphone{$\pdim \rightarrow \pdim - \card{\setone}$}
+      \end{center}
+    \end{block}
+  \end{minipage}
+  \pause
+  \begin{center}
+    Combine both for a double Kiss Cool effect ! \\
+    Dimension shrinking : \emphone{$\pdim \rightarrow \pdim - \card{\setzero} - \card{\setone}$}
+  \end{center}
+\end{frame}
+
+\begin{frame}{Conclusion}
+  \textbf{Our results in a nutshell}
+  \begin{itemize}
+    \item Application to the \emphone{Elastic-Net} problem 
+    \pause
+    \begin{itemize}
+      \item $\lossfunc(\dic\pv) = \tfrac{1}{2}\norm{\obs-\dic\pv}{2}^2$
+      \pause
+      \item $\regfunc(\pv) = \enetreg\norm{\pv}{1} + \tfrac{1-\enetreg}{2}\norm{\pv}{2}^2$ with $\enetreg \in ]0,1[$
+      \pause
+      \item Well-known problem in Statistics and Machine Learning
+    \end{itemize}
+    \pause
+    \item Significant improvement on various setups due to
+    \begin{itemize}
+      \item Dimension shrinking
+      \pause
+      \item Conditioning improvement
+    \end{itemize}
+  \end{itemize}
+\end{frame}
